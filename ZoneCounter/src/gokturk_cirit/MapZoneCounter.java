@@ -40,11 +40,12 @@ public class MapZoneCounter implements ZoneCounterInterface {
 				
 			}
 			
-			// Sets border at given point.
+			// Sets a border at given point.
 			@Override
 			public void SetBorder(int x, int y) throws Exception {
-				if(mapArray[x][y] == 1)
+				if(mapArray[x][y] == 1) {
 					System.out.println("Specified coordinate is already a border!");
+				}
 				else {
 				mapArray[x][y] = 1;
 				System.out.println("coordinates : " + x + "," + y + " set as border succesfully.");
@@ -52,7 +53,7 @@ public class MapZoneCounter implements ZoneCounterInterface {
 				
 			}
 			
-			// Clears border at given point.
+			// Clears a border at given point.
 			@Override
 			public void ClearBorder(int x, int y) throws Exception {
 				if(mapArray[x][y] == 0)
@@ -67,7 +68,11 @@ public class MapZoneCounter implements ZoneCounterInterface {
 			@Override
 			public boolean IsBorder(int x, int y) throws Exception {
 				System.out.println("Is the point [" + x +"][" + y + "] a border?  ");
-				return (mapArray[x][y] == 1);
+				if(mapArray[x][y] == 1)
+					return true;
+				else{
+					return false;
+				}
 			}
 			
 			// Show map contents.
@@ -85,32 +90,45 @@ public class MapZoneCounter implements ZoneCounterInterface {
 			
 		});
 		
+		//Display calculation result
 		System.out.println();
-		System.out.println("Calculated number of region(s) = " + zoneCount.Solve());
+		System.out.println("Calculated number of Zone(s) = " + zoneCount.Solve());
 
 	}
 	
 	// Feeds map data into solution class, then get ready for Solve() method.
 	@Override
 	public void Init(MapInterface map) throws Exception {
-		Dimension dim = new Dimension(4,9);
+		
+		//Create dimension object and set an empty map 
+		Dimension dim = new Dimension(24,36);
 		map.SetSize(dim); 
-		map.SetBorder(0,1);
-		map.SetBorder(1,0);
-		map.SetBorder(1,2);
-		map.SetBorder(2,1);
-		map.SetBorder(1,1);
-		map.SetBorder(1,3);
-		map.SetBorder(1,4);
-		map.SetBorder(1,5);
-		map.SetBorder(1,6);
-		map.SetBorder(1,7);
-		map.SetBorder(3,1);
-		map.SetBorder(0,5);
+		
+		//Create an 2D int array to store border coordinates
+		int [][] points = new int [][] { {0,18},{0,24},{1,16},{1,17},{1,24},{2,15},{2,24},
+		{3,14},{3,25},{4,12},{4,13},{4,25},{5,11},{5,26},{5,35},{6,10},{6,26},{6,27},{6,28},{6,29},{6,30},{6,31},{6,32},
+		{6,33},{6,34},{7,8},{7,9},{7,26},{8,7},{8,27},{9,5},{9,6},{9,27},{10,4},{10,5},{10,27},{11,3},{11,6},{11,28},{12,2},{12,7},{12,28},
+		{13,0},{13,1},{13,7},{13,25},{13,26},{13,27},{13,28},{13,29},
+		{14,8},{14,21},{14,22},{14,23},{14,24},{14,29},
+		{15,8},{15,17},{15,18},{15,19},{15,20},{15,29},
+		{16,9},{16,13},{16,14},{16,15},{16,16},{16,30},
+		{17,9},{17,10},{17,11},{17,12},{17,30},
+		{18,10},{18,31},{19,10},{19,31},{20,11},{20,31},{21,11},{21,32},{22,12},{22,32},{23,12},{23,33}
+		};
+		
+		//Store all border coordinates into map object
+		for(int i = 0; i<points.length; i++)
+			map.SetBorder(points[i][0],points[i][1]);
+		
+		//Check if a coordinate is border in the map objecy by calling isBorder method. 
 		System.out.println(map.IsBorder(3, 1));
+		
+		//Get size of the map and print it to console 
 		System.out.println("getSize() method is initiated...");
 		map.GetSize(dim);
 		System.out.println();
+		
+		//Display map
 		map.Show();
 		
 	}
@@ -118,7 +136,7 @@ public class MapZoneCounter implements ZoneCounterInterface {
 	// Counts zones in map provided with Init() method, then return the result.
 	@Override
 	public int Solve() throws Exception {
-		return countIslands(mapArray);
+		return countZones(mapArray);
 	}
 	
 	// Method for checking range and visited index values
@@ -129,23 +147,23 @@ public class MapZoneCounter implements ZoneCounterInterface {
 	}
 	
 	// A utility function to do DFS for a 2D boolean matrix.
-	// It only considers the 8 neighbors as adjacent vertices
+	// It only considers the 4 neighbors as adjacent vertices
 	public void DFS(int M[][], int r, int c, boolean visited[][]) {
 		// These arrays are used to get row and column numbers
-		// of 8 neighbors of a given cell
-		int rowNbr[] = new int[] { -1, -1, -1, 0, 0, 1, 1, 1 };
-		int colNbr[] = new int[] { -1, 0, 1, -1, 1, -1, 0, 1 };
+		// of 4 neighbors of a given cell
+		int rowNbr[] = new int[] { -1, 0, 0, 1 };
+		int colNbr[] = new int[] {  0, -1, 1, 0 };
 
 		// Mark this cell as visited
 		visited[r][c] = true;
 
 		// Recur for all connected neighbors
-		for (int k = 0; k < 8; ++k)
+		for (int k = 0; k < 4; ++k)
 			if (isSafe(M, r + rowNbr[k], c + colNbr[k], visited))
 				DFS(M, r + rowNbr[k], c + colNbr[k], visited);
 	}
 	
-	public int countIslands(int M[][]) {
+	public int countZones(int M[][]) {
 		// Make a boolean array to mark visited cells.
 		// Initially all cells are unvisited
 		boolean visited[][] = new boolean[row][col];
@@ -156,9 +174,9 @@ public class MapZoneCounter implements ZoneCounterInterface {
 		for (int i = 0; i < row; ++i)
 			for (int j = 0; j < col; ++j)
 				if (M[i][j] == 0 && !visited[i][j]) // If a cell with
-				{ // value 1 is not
-					// visited yet, then new island found, Visit all
-					// cells in this island and increment island count
+				{ // value 0 is not
+					// visited yet then a new zone is found. 
+					// Visit all cells in this zone and increment zone count
 					DFS(M, i, j, visited);
 					++count;
 				}
